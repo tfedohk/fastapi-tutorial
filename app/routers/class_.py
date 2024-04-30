@@ -4,6 +4,9 @@ from typing import List
 from fastapi import APIRouter
 from sqlalchemy import select, insert, update, delete
 
+from app.core.logger import logger
+from app.core.redis import redis_cache, key_builder
+
 from app.core.db.session import AsyncScopedSession
 from app.models.schemas.common import BaseResponse, HttpResponse  #
 from app.models.schemas.class_ import (
@@ -55,11 +58,21 @@ async def create_class(  # endpoint
     "/list", response_model=BaseResponse[List[ClassResp]]
 )  # 전체 클래스 리스트를 가져오라: get("/list", List[ClassResp]].
 async def read_class_list() -> BaseResponse[List[ClassResp]]:
-    async with AsyncScopedSession() as session:
-        stmt = select(Class)
-        result = (
-            (await session.execute(stmt)).scalars().all()
-        )  # all select는 위험하긴 함. 그래서 페이지네이션이 필요->다음 시간.
+    _key = key_builder("read_class_list")
+
+    if await redis_cache.exists(_key):
+        result = await redis_cache.get(_key)
+        logger.debug(f"Cache hit: {_key}")
+
+    else:
+        async with AsyncScopedSession() as session:
+            stmt = select(Class)
+            result = (
+                (await session.execute(stmt)).scalars().all()
+            )  # all select는 위험하긴 함. 그래서 페이지네이션이 필요->다음 시간.
+
+            await redis_cache.set(_key, result, ttl=60)
+            logger.debug(f"Cache miss: {_key}")
 
     return HttpResponse(
         content=[
@@ -80,9 +93,18 @@ async def read_class_list() -> BaseResponse[List[ClassResp]]:
 async def read_class(
     class_id: str,
 ) -> BaseResponse[ClassResp]:
-    async with AsyncScopedSession() as session:
-        stmt = select(Class).where(Class.class_id == class_id)
-        result = (await session.execute(stmt)).scalar()
+    _key = key_builder("read_class", class_id)
+    if redis_cache.exists(_key):
+        result = await redis_cache.get(_key)
+        logger.debug(f"Cache hit: {_key}")
+
+    else:
+        async with AsyncScopedSession() as session:
+            stmt = select(Class).where(Class.class_id == class_id)
+            result = (await session.execute(stmt)).scalar()
+
+        await redis_cache.set(_key, result, ttl=60)
+        logger.debug(f"Cache miss: {_key}")
 
     return HttpResponse(
         content=ClassResp(
@@ -126,13 +148,22 @@ async def create_class_notice(
 async def read_class_notice_list(
     class_id: str,
 ) -> BaseResponse[List[ClassNoticeResp]]:
-    async with AsyncScopedSession() as session:
-        stmt = (
-            select(ClassNotice)
-            .where(ClassNotice.class_id == class_id)
-            .order_by(ClassNotice.created_at.desc())
-        )
-        result = (await session.execute(stmt)).scalars().all()
+    _key = key_builder("read_class_notice_list", class_id)
+    if redis_cache.exists(_key):
+        result = await redis_cache.get(_key)
+        logger.debug(f"Cache hit: {_key}")
+
+    else:
+        async with AsyncScopedSession() as session:
+            stmt = (
+                select(ClassNotice)
+                .where(ClassNotice.class_id == class_id)
+                .order_by(ClassNotice.created_at.desc())
+            )
+            result = (await session.execute(stmt)).scalars().all()
+
+        await redis_cache.set(_key, result, ttl=60)
+        logger.debug(f"Cache miss: {_key}")
 
     return HttpResponse(
         content=[
