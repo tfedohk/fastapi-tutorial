@@ -18,6 +18,11 @@ class BaseResponse(
     )
 
 
+class ErrorResponse(BaseModel):
+    message: str
+    statusCode: str
+
+
 class HttpResponse(
     ORJSONResponse
 ):  # Pydantic의 Response Model의 성능 개선을 위해 실제 리턴은 ORJSONResponse를 이용

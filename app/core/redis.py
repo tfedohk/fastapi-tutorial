@@ -4,6 +4,8 @@ from redis.asyncio import Redis
 
 from app.core.config import config
 
+from typing import Optional
+
 
 class RedisCache:
     def __init__(self):
@@ -18,7 +20,9 @@ class RedisCache:
     async def close(self) -> None:
         await self.redis.close()
 
-    async def set(self, key: str, value: object, ttl: int = None) -> None:
+    async def set(
+        self, key: str, value: object, ttl: Optional[int] = None
+    ) -> None:  # Null이 가능한 것은 항상 Optional을 써야함
         await self.redis.set(key, pickle.dumps(value), ex=ttl)
 
     async def get(self, key: str) -> object:
