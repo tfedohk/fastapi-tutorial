@@ -5,6 +5,8 @@ ERROR_400_CLASS_NOTICE_CREATION_FAILED = "40003"
 ERROR_400_CLASS_NOTICE_UPDATE_FAILED = "40004"
 ERROR_400_CLASS_NOTICE_DELETE_FAILED = "40005"
 
+ERROR_401_INVALID_API_KEY = "40100"
+
 
 class BaseAPIException(Exception):
     def __init__(self, code: str, message: str):
@@ -14,6 +16,12 @@ class BaseAPIException(Exception):
             Exception: 최상위 파이썬 기본 Exception
             코드랑 메세지를 받아서 API에서 발생시킬 에러 객체를 만든다.
         """
+
+
+class BaseAuthException(Exception):
+    def __init__(self, code: str, message: str):
+        self.code = code
+        self.message = message
 
 
 class ClassNotFoundException(BaseAPIException):
@@ -65,3 +73,8 @@ class ClassNoticeDeleteFailed(BaseAPIException):
             code=ERROR_400_CLASS_NOTICE_DELETE_FAILED,
             message="Class Notice delete failed",
         )
+
+
+class InvalidAPIKey(BaseAuthException):
+    def __init__(self):
+        super().__init__(code=ERROR_401_INVALID_API_KEY, message="Invalid API Key")
