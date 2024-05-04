@@ -3,10 +3,9 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 from pydantic.dataclasses import dataclass
-from models.constants import UserRole
 
 from app.models.dtos.user import UserDTO
-from app.models.constant import UserRole
+from app.models.constants import UserRole
 
 
 class UserReq(BaseModel):

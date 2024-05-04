@@ -1,8 +1,10 @@
 from datetime import datetime
 from typing import Optional
 
+
 from pydantic import BaseModel, Field
 from pydantic.dataclasses import dataclass
+from typing import List
 
 from app.models.dtos.class_ import (
     ClassDTO,
@@ -16,10 +18,10 @@ from app.models.schemas.common import PageResp
 class ClassReq(BaseModel):  # postfix로 Req, Resp는 각각 요청, 응답이다. 식별을 위함.
     # 요청은 Pydantic의 BaseModel을 그대로 쓴다.
     className: str = Field(
-        ..., title="Class Name"
+        ..., description="Class Name"
     )  # 외부 통신은 서로 다른 언어와 통신한다. 팀바팀, 사바사로 카멜/스네이크를 따라라.
     teacherId: str = Field(
-        ..., title="Teacher ID"
+        ..., description="Teacher ID"
     )  # 필드에 대한 정보들을 파라미터로 추가할 수 있다. 파라미터 목록 살펴보기.
 
     def to_dto(self) -> ClassDTO:
@@ -32,10 +34,10 @@ class ClassReq(BaseModel):  # postfix로 Req, Resp는 각각 요청, 응답이�
 
 @dataclass
 class ClassResp:  # 실제 반환은 ORJSONResponse로 한다.
-    classId: str = Field(..., title="Class ID")
-    className: str = Field(..., title="Class Name")
-    teacherId: str = Field(..., title="Teacher ID")
-    createdAt: datetime = Field(..., title="Created At")
+    classId: str = Field(..., description="Class ID")
+    className: str = Field(..., description="Class Name")
+    teacherId: str = Field(..., description="Teacher ID")
+    createdAt: datetime = Field(..., description="Created At")
     # dataclass로 정의하면 바로 JSON으로 변환돼서 성능이 개선된다.
 
     @classmethod  # 아직 ClassResp 인스턴스가 없는 상태이기 때문에, classmethod로 정의한다. 인스턴스 메소드, 클래스 메소드를 공부해라.
@@ -57,8 +59,8 @@ class ClassResp:  # 실제 반환은 ORJSONResponse로 한다.
 
 @dataclass
 class ClassListResp:
-    data: List[ClassResp] = Field(..., title="Data")
-    page: PageResp = Field(..., title="Page")
+    data: List[ClassResp] = Field(..., description="Data")
+    page: PageResp = Field(..., description="Page")
 
     @classmethod
     def from_dto(cls, dto: ClassListDTO) -> "ClassListResp":
@@ -69,7 +71,7 @@ class ClassListResp:
 
 
 class ClassNoticeReq(BaseModel):
-    message: str = Field(..., title="Message")
+    message: str = Field(..., description="Message")
 
     def to_dto(self, class_id: str = None, notice_id: int = None) -> ClassNoticeDTO:
         return ClassNoticeDTO(
@@ -81,11 +83,11 @@ class ClassNoticeReq(BaseModel):
 
 @dataclass
 class ClassNoticeResp:
-    id: int = Field(..., title="ID")
-    classId: str = Field(..., title="Class ID")
-    message: str = Field(..., title="Message")
-    createdAt: datetime = Field(..., title="Created At")
-    updatedAt: Optional[datetime] = Field(None, title="Updated At")
+    id: int = Field(..., description="ID")
+    classId: str = Field(..., description="Class ID")
+    message: str = Field(..., description="Message")
+    createdAt: datetime = Field(..., description="Created At")
+    updatedAt: Optional[datetime] = Field(None, description="Updated At")
 
     @classmethod
     def from_dto(cls, dto: ClassNoticeDTO) -> "ClassNoticeResp":
@@ -100,8 +102,8 @@ class ClassNoticeResp:
 
 @dataclass
 class ClassNoticeListResp:
-    data: List[ClassNoticeResp] = Field(..., title="Data")
-    page: PageResp = Field(..., title="Page")
+    data: List[ClassNoticeResp] = Field(..., description="Data")
+    page: PageResp = Field(..., description="Page")
 
     @classmethod
     def from_dto(cls, dto: ClassNoticeListDTO) -> "ClassNoticeListResp":

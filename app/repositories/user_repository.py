@@ -6,7 +6,7 @@ from app.core.db.session import AsyncScopedSession
 from app.models.db.student import Student
 from app.models.db.teacher import Teacher
 from app.models.dtos.user import UserDTO
-from app.models.constant import UserRole
+from app.models.constants import UserRole
 
 
 class UserRepository:

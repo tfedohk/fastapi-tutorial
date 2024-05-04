@@ -2,7 +2,7 @@ from typing import Optional
 from dataclasses import dataclass
 from datetime import datetime
 
-from app.models.constant import UserRole
+from app.models.constants import UserRole
 
 
 @dataclass
