@@ -1,36 +1,52 @@
-# tests/conftest.py
+import pytest
+from unittest.mock import AsyncMock
 
-import pytest_asyncio
+from httpx import AsyncClient
 
-# import pytest로 해도 됨
-# 비동기 커넥션 엔진을 쓰려면 asyncio를 사용해야 함
-
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-
-
-@pytest_asyncio.fixture
-async def async_engine():
-    engine = create_async_engine(
-        url="postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
-    )
-
-    yield engine
-    # yield는 제너레이터 문법임
-    # engine을 잠깐 리턴한다.
-    # 코드 종료 시 리턴했던 것이 다시 반환되면서 await을 실행한다.
-    # 미들웨어, 라이프스팬 함수도 제너리이터와 비슷하다.
-
-    await engine.dispose()
-    # yield없이 return engine으로 해도 된다.
+from app.main import create_app
+from app.core.container import Container
+from app.services import UserService, ClassService
+from app.repositories import UserRepository, ClassRepository
 
 
-@pytest_asyncio.fixture
-async def async_session(
-    async_engine,
-):  # `async_engine`이라는 매개변수 이름을 사용하면 위의 `async def async_engine` 으로 정의한 fixture가 자동으로 주입됩니다.
-    # fixture에 의해 async_engine이 알아서 이 함수의 파라미터로 들어간다.
-    session = AsyncSession(bind=async_engine)
+@pytest.fixture
+def container() -> Container:
+    # app/main.py에서 빼놓은 container다.
+    # 생성 후 리턴
+    return Container()
 
-    yield session
 
-    await session.close()
+@pytest.fixture
+def async_client(container) -> AsyncClient:  # 컨테이너를 실제로 가져다 쓰는 부분
+    # fastAPI앱을 테스트하기 위한 하나의 객체로 만들어준다.
+    # 서비스를 실제로 띄우지 않은 채로 객체로 만들어서 호출을 받을 수 있는 상태로 만든다.
+    # httpx를 쓴다.
+    app = create_app(container)  # app/main.py의 create_app.
+    return AsyncClient(app=app, base_url="http://test")
+    # 통합 테스트 시에 async_client를 이용해서 엔드포인트별로 콜을 날린다.
+
+
+@pytest.fixture
+def user_repository_mock():
+    # 모킹. 유저 레포 외 클래스 레포 등을 흉내내는 목 객체를 정의한 것.
+    # 비동기 함수를 쓸 것이기 때문에 에이싱크목을 쓴다.
+    # 그냥 def를 쓴다면 asyncmock이 아니라 그냥 mock을 쓴다.
+    return AsyncMock(spec=UserRepository)
+    # 테스트 할 때 직접 DB에 접근하지 않고, 이 모킹된 객체를 사용한다.
+    # 특정 값이 나오도록 주입하고서 실제로 처리되는지를 살펴볼 목적이다.
+
+
+@pytest.fixture
+def class_repository_mock():
+    return AsyncMock(spec=ClassRepository)
+
+
+@pytest.fixture
+def user_service_mock(user_repository_mock):
+    # 얘는 모킹할 게 없다. 이미 user_repository_mock에서 하고 있기 때문.
+    return UserService(user_repository=user_repository_mock)
+
+
+@pytest.fixture
+def class_service_mock(class_repository_mock):
+    return ClassService(class_repository=class_repository_mock)
