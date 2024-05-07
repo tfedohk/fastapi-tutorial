@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlalchemy import select, insert, update, delete, func, literal
+from sqlalchemy import select, insert, update, delete, func
 
 from app.core.logger import logger
 from app.core.redis import RedisCacheDecorator

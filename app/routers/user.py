@@ -20,6 +20,12 @@ async def create_teacher(
     request_body: UserReq,
     user_service: services.UserService = Depends(Provide[Container.user_service]),
 ) -> BaseResponse[UserResp]:
+    # result = await user_service.create_teacher_user(
+    #     request_body.to_dto(user_role=UserRole.TEACHER)
+    # )
+
+    # return HttpResponse(content=UserResp.from_dto(result))
+
     result = await user_service.create_teacher_user(
         request_body.to_dto(user_role=UserRole.TEACHER)
     )

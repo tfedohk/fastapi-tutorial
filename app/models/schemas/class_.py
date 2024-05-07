@@ -13,6 +13,7 @@ from app.models.dtos.class_ import (
     ClassNoticeListDTO,
 )
 from app.models.schemas.common import PageResp
+from uuid import uuid4
 
 
 class ClassReq(BaseModel):  # postfix로 Req, Resp는 각각 요청, 응답이다. 식별을 위함.
