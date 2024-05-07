@@ -17,7 +17,7 @@ class Config(BaseSettings):
     LOG_LEVEL: int = logging.DEBUG
 
     DB_URL: str = (
-        "postgresql+asyncpg://postgres:ls_mle_course@34.22.70.131:5432/academy"  # 에러 포인트. 데이터베이스 이름 잘 넣기.
+        "postgresql+asyncpg://postgres:ls_mle_course@34.22.70.131:5432/academy"  # 에러 포인트. 데이터베이스 이름 잘 넣기.  # credential 정보 등은 환경변수로 빼는 게 좋다. 즉, Github에 올리지 말아야 한다.
     )
 
     REDIS_HOST: str = "localhost"  # "34.47.93.37"

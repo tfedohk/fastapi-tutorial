@@ -57,6 +57,9 @@ async def test_read_class_list(
 
     # Run
     results = await class_service_mock.read_class_list(page=page, limit=limit)
+    # conftest에서 class_service_mock을 만들 때, 이미 class_repository_mock을 주입했기 때문에
+    # class_service_mock을 통해 class_repository_mock을 사용할 수 있다.
+    # 즉, 따로 class_repository_mock을 여기서 주입하지 않아도 된다.
 
     # Assert
     assert results != None
